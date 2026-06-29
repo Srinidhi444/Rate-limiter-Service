@@ -4,10 +4,9 @@ import { ConsumeResult } from "../types/result";
 
 export function consume(
     bucket: Bucket,
-    clientConfig: ClientConfig
+    clientConfig: ClientConfig,
+    currentTime: number
 ): ConsumeResult {
-
-    const currentTime = Date.now();
 
     const refilledBucket = refill(bucket, clientConfig, currentTime);
 
