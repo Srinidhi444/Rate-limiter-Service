@@ -1,29 +1,45 @@
+import fs from "fs/promises";
+import path from "path";
+
 import redis from "../redis/redis";
-import { Bucket } from "../types/bucket";
+import { ClientConfig } from "../types/client";
+import { ConsumeResult } from "../types/result";
 
 class BucketRepository {
+    private script: string | null = null;
+
     private getKey(clientId: string): string {
         return `bucket:${clientId}`;
     }
 
-    async getBucket(clientId: string): Promise<Bucket | null> {
-        const data = await redis.get(this.getKey(clientId));
-
-        if (!data) {
-            return null;
+    private async getScript(): Promise<string> {
+        if (!this.script) {
+            this.script = await fs.readFile(
+                path.join(__dirname, "../lua/tokenBucket.lua"),
+                "utf-8"
+            );
         }
 
-        return JSON.parse(data) as Bucket;
+        return this.script;
     }
 
-    async saveBucket(clientId: string, bucket: Bucket): Promise<void> {
-        await redis.set(
-            this.getKey(clientId),
-            JSON.stringify(bucket),
-            {
-                EX: 3600, // expire after 1 hour of inactivity
-            }
-        );
+    async consume(client: ClientConfig): Promise<ConsumeResult> {
+        const script = await this.getScript();
+
+        const result = await redis.eval(script, {
+            keys: [this.getKey(client.clientId)],
+            arguments: [
+                client.capacity.toString(),
+                client.refillRate.toString(),
+                Date.now().toString(),
+            ],
+        }) as [number, number, number];
+
+        return {
+            allowed: result[0] === 1,
+            remainingTokens: Number(result[1]),
+            resetTime: Number(result[2]),
+        };
     }
 
     async deleteBucket(clientId: string): Promise<void> {
