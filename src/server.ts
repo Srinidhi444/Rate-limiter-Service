@@ -1,7 +1,14 @@
 import app from "./app";
+import luaLoader from "./lua/luaLoader";
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+async function start() {
+    await luaLoader.loadScripts();
+
+    app.listen(PORT, () => {
+        console.log(`Server running on ${PORT}`);
+    });
+}
+
+start();
