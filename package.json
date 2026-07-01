@@ -1,20 +1,32 @@
 {
-  "name": "rate-limiter",
+  "name": "@srinidhi/rate-limiter",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Distributed Redis-backed Token Bucket Rate Limiter for Node.js and Express",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js"
-  },
+  "build": "tsc && shx mkdir -p dist/lua && shx cp src/lua/tokenBucket.lua dist/lua/",
+  "prepublishOnly": "npm run build"
+},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Srinidhi444/Rate-limiter-Service.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "rate-limiter",
+    "redis",
+    "express",
+    "middleware",
+    "token-bucket",
+    "typescript"
+  ],
+  "author": "Srinidhi Kulkarni",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/Srinidhi444/Rate-limiter-Service/issues"
   },
@@ -26,7 +38,7 @@
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^26.0.1",
-    "tsx": "^4.22.4",
+    "shx": "^0.4.0",
     "typescript": "^6.0.3"
   }
 }

@@ -1,28 +1,44 @@
-import fs from "fs/promises";
-import path from "path";
-import luaLoader from "../lua/luaLoader";
-import redis from "../redis/redis";
+import { RedisClientType } from "redis";
+
 import { ClientConfig } from "../types/client";
 import { ConsumeResult } from "../types/result";
 
-class BucketRepository {
-   
+export class BucketRepository {
 
-    private getKey(clientId: string): string {
+    constructor(
+        private readonly redis: RedisClientType,
+        private readonly tokenBucketSha: string
+    ) {}
+
+    private getBucketKey(clientId: string): string {
         return `bucket:${clientId}`;
     }
 
-   
+    private getStatsKey(clientId: string): string {
+        return `stats:${clientId}`;
+    }
 
-    async consume(client: ClientConfig): Promise<ConsumeResult> {
-        const result = await redis.evalSha(
-            luaLoader.getTokenBucketSha(),
+    async consume(
+        client: ClientConfig
+    ): Promise<ConsumeResult> {
+
+        const currentTime = Date.now();
+        const currentSecond = Math.floor(currentTime / 1000);
+
+        const result = await this.redis.evalSha(
+            this.tokenBucketSha,
             {
-                keys: [this.getKey(client.clientId)],
+                keys: [
+                    this.getBucketKey(client.clientId),
+                    this.getStatsKey(client.clientId),
+                    "activity",
+                    `requests:${currentSecond}`,
+                ],
                 arguments: [
                     client.capacity.toString(),
                     client.refillRate.toString(),
-                    Date.now().toString(),
+                    currentTime.toString(),
+                    client.clientId,
                 ],
             }
         ) as [number, number, number];
@@ -35,8 +51,7 @@ class BucketRepository {
     }
 
     async deleteBucket(clientId: string): Promise<void> {
-        await redis.del(this.getKey(clientId));
+        await this.redis.del(this.getBucketKey(clientId));
     }
-}
 
-export default new BucketRepository();
+}
