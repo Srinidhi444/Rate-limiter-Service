@@ -4,14 +4,19 @@ import clientRepository from "../repositories/client.repository";
 import { ConsumeResult } from "../types/result";
 
 class RateLimiterService {
-    async check(clientId: string): Promise<ConsumeResult> {
+    async check(clientId: string) {
         const client = await clientRepository.getClient(clientId);
 
         if (!client) {
             throw new Error("Client not found");
         }
 
-        return await bucketRepository.consume(client);
+        const result = await bucketRepository.consume(client);
+
+        return {
+            result,
+            capacity: client.capacity,
+        };
     }
 }
 

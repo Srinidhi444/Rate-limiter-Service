@@ -13,8 +13,9 @@ class RateLimiterController {
                 return;
             }
 
-            const result = await rateLimiterService.check(clientId);
+            const { result, capacity } = await rateLimiterService.check(clientId);
 
+            res.setHeader("X-RateLimit-Limit", capacity);
             res.setHeader("X-RateLimit-Remaining", result.remainingTokens);
             res.setHeader("X-RateLimit-Reset", result.resetTime);
 
