@@ -7,7 +7,7 @@ This project demonstrates how production-grade rate limiting can be implemented 
 The library is published on npm as:
 
 ```bash
-npm install @srinidhi/rate-limiter
+npm install @srinidhi-kulkarni/rate-limiter
 ```
 
 ---
@@ -358,47 +358,6 @@ No inconsistent bucket state
 
 ---
 
-# Why Redis Instead of Memory?
-
-Memory-based implementations work only on a single server.
-
-```
-Server A
-
-Bucket A
-```
-
-```
-Server B
-
-Bucket B
-```
-
-The buckets are independent.
-
-Redis provides a single shared bucket.
-
-```
-Server A
-
-      │
-
-Server B
-
-      │
-
-Server C
-
-      │
-
-      ▼
-
-    Redis
-```
-
-Every server updates the same bucket.
-
----
 
 # Current Capabilities
 
@@ -412,19 +371,14 @@ Every server updates the same bucket.
 
 # Future Improvements
 
-- Sliding Window algorithm
-- Fixed Window algorithm
-- Fastify middleware
-- NestJS integration
-- Metrics dashboard
-- Prometheus exporter
+- Maybe adding more algorithms and RAM based limiting also
 
 ---
 
 # Installation
 
 ```bash
-npm install @srinidhi/rate-limiter
+npm install @srinidhi-kulkarni/rate-limiter
 ```
 
 ---
