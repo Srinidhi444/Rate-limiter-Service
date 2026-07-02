@@ -14,31 +14,22 @@ export class BucketRepository {
         return `bucket:${clientId}`;
     }
 
-    private getStatsKey(clientId: string): string {
-        return `stats:${clientId}`;
-    }
-
     async consume(
         client: ClientConfig
     ): Promise<ConsumeResult> {
 
         const currentTime = Date.now();
-        const currentSecond = Math.floor(currentTime / 1000);
 
         const result = await this.redis.evalSha(
             this.tokenBucketSha,
             {
                 keys: [
                     this.getBucketKey(client.clientId),
-                    this.getStatsKey(client.clientId),
-                    "activity",
-                    `requests:${currentSecond}`,
                 ],
                 arguments: [
                     client.capacity.toString(),
                     client.refillRate.toString(),
                     currentTime.toString(),
-                    client.clientId,
                 ],
             }
         ) as [number, number, number];

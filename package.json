@@ -1,6 +1,6 @@
 {
-  "name": "@srinidhi/rate-limiter",
-  "version": "1.0.0",
+  "name": "@srinidhi-kulkarni/rate-limiter",
+  "version": "1.0.2",
   "description": "Distributed Redis-backed Token Bucket Rate Limiter for Node.js and Express",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

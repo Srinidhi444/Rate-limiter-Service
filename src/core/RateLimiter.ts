@@ -90,6 +90,7 @@ export class RateLimiter {
         await this.clientRepository.saveClient(
             client
         );
+        await this.bucketRepository.deleteBucket(client.clientId);
 
     }
 

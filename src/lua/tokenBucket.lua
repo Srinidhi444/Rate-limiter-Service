@@ -1,12 +1,8 @@
 local bucketKey = KEYS[1]
-local statsKey = KEYS[2]
-local activityKey = KEYS[3]
-local rpsKey = KEYS[4]
 
 local capacity = tonumber(ARGV[1])
 local refillRate = tonumber(ARGV[2])
 local currentTime = tonumber(ARGV[3])
-local clientId = ARGV[4]
 
 ----------------------------------------------------
 -- Fetch bucket
@@ -81,89 +77,6 @@ redis.call(
     "EXPIRE",
     bucketKey,
     3600
-)
-
-----------------------------------------------------
--- Stats
-----------------------------------------------------
-
-redis.call(
-    "HINCRBY",
-    statsKey,
-    "totalRequests",
-    1
-)
-
-if allowed == 1 then
-
-    redis.call(
-        "HINCRBY",
-        statsKey,
-        "allowedRequests",
-        1
-    )
-
-else
-
-    redis.call(
-        "HINCRBY",
-        statsKey,
-        "blockedRequests",
-        1
-    )
-
-end
-
-redis.call(
-    "HSET",
-    statsKey,
-    "lastRequestTime",
-    currentTime
-)
-
-redis.call(
-    "EXPIRE",
-    statsKey,
-    3600
-)
-
-----------------------------------------------------
--- Activity Feed
-----------------------------------------------------
-
-local event = cjson.encode({
-    time=currentTime,
-    clientId=clientId,
-    allowed=(allowed==1),
-    remainingTokens=tokens
-})
-
-redis.call(
-    "LPUSH",
-    activityKey,
-    event
-)
-
-redis.call(
-    "LTRIM",
-    activityKey,
-    0,
-    199
-)
-
-----------------------------------------------------
--- Requests Per Second
-----------------------------------------------------
-
-redis.call(
-    "INCR",
-    rpsKey
-)
-
-redis.call(
-    "EXPIRE",
-    rpsKey,
-    2
 )
 
 ----------------------------------------------------
